@@ -20,5 +20,6 @@
     </orderEntry>
     <orderEntry type="library" name="xerial.sqlite.jdbc" level="project" />
     <orderEntry type="library" name="seleniumhq.selenium.java" level="project" />
+    <orderEntry type="library" name="pl.pragmatists.JUnitParams" level="project" />
   </component>
 </module>
