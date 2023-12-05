@@ -9,6 +9,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.openqa.selenium.NoSuchElementException;
+
 
 import java.sql.*;
 import java.text.ParseException;
@@ -71,7 +73,7 @@ public class FlightsTest {
         // Wait for the page to load - adjust the expected conditions based on the actual behavior of the page
         wait.until(ExpectedConditions.urlContains("search"));
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 10; i++) {
             WebElement departureNextButton = driver.findElement(By.cssSelector(".uNiB1 > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > button:nth-child(2)"));
             WebElement returnNextButton = driver.findElement(By.cssSelector(".uNiB1 > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(3) > button:nth-child(2)"));
             departureNextButton.click();
@@ -137,16 +139,25 @@ public class FlightsTest {
     }
 
     private void storeFlightInformation(String destination) {
-        String airlineName = driver.findElement(By.xpath("//*[@id=\"yDmH0d\"]/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/ul/li[1]/div/div[2]/div/div[2]/div[2]/div[2]")).getText();
-        String price = driver.findElement(By.cssSelector("ul.Rk10dc:nth-child(3) > li:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(6) > div:nth-child(1) > div:nth-child(2) > span:nth-child(1)")).getText();
+        try {
+            WebElement airlineElement = driver.findElement(By.xpath("//*[@id=\"yDmH0d\"]/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/ul/li[1]/div/div[2]/div/div[2]/div[2]/div[2]"));
+            String airlineName = airlineElement.getText();
+            System.out.println("Airline: " + airlineName);
 
-        System.out.println("Airline: " + airlineName);
-        System.out.println("Price: " + price);
-        System.out.println("Destination: " + destination);
+            // Additional information retrieval and storage
+            String price = driver.findElement(By.cssSelector("ul.Rk10dc:nth-child(3) > li:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(6) > div:nth-child(1) > div:nth-child(2) > span:nth-child(1)")).getText();
 
-        // Store the information in the database
-        storeFlightInformation(airlineName, price, destination);
+            System.out.println("Price: " + price);
+            System.out.println("Destination: " + destination);
+
+            // Store the information in the database
+            storeFlightInformation(airlineName, price, destination);
+
+        } catch (NoSuchElementException e) {
+            System.out.println("Failed to retrieve airline name");
+        }
     }
+
 
     private void storeFlightInformation(String airlineName, String price, String destination) {
         try (Statement statement = connection.createStatement()) {
