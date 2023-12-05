@@ -61,7 +61,20 @@ public class FlightsTest {
         // Wait for the page to load - adjust the expected conditions based on the actual behavior of the page
         wait.until(ExpectedConditions.urlContains("search"));
 
-        storeFlightInformation(wait);
+        for (int i = 0; i < 100; i++) {
+            WebElement departureNextButton = driver.findElement(By.cssSelector(".uNiB1 > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > button:nth-child(2)"));
+            WebElement returnNextButton = driver.findElement(By.cssSelector(".uNiB1 > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(3) > button:nth-child(2)"));
+            departureNextButton.click();
+            returnNextButton.click();
+            try {
+                sleep(1000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            storeFlightInformation();
+        }
+
+
     }
 
     @Test
@@ -84,7 +97,6 @@ public class FlightsTest {
             sleep(1000);
 
             // Get and store flight information
-            storeFlightInformation(wait);
 
 
 
@@ -112,9 +124,9 @@ public class FlightsTest {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".uNiB1"))); // Assuming this element is present on the loaded page
     }
 
-    private void storeFlightInformation(WebDriverWait wait) {
-        String airlineName = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[@id=\"yDmH0d\"]/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/ul/li[1]/div/div[2]/div/div[2]/div[2]/div[2]"))).getText();
-        String price = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("ul.Rk10dc:nth-child(3) > li:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(6) > div:nth-child(1) > div:nth-child(2) > span:nth-child(1)"))).getText();
+    private void storeFlightInformation() {
+        String airlineName =driver.findElement(By.xpath("//*[@id=\"yDmH0d\"]/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/ul/li[1]/div/div[2]/div/div[2]/div[2]/div[2]")).getText();
+        String price = driver.findElement(By.cssSelector("ul.Rk10dc:nth-child(3) > li:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(6) > div:nth-child(1) > div:nth-child(2) > span:nth-child(1)")).getText();
 
         System.out.println("Airline: " + airlineName);
         System.out.println("Price: " + price);
