@@ -14,9 +14,6 @@ import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 import org.openqa.selenium.JavascriptExecutor;
 
 import static java.lang.Thread.sleep;
@@ -34,8 +31,13 @@ public class FlightsTest {
             connection = DriverManager.getConnection("jdbc:sqlite:newflights.sqlite");
             Statement statement = connection.createStatement();
 
-            // Print the SQL statement before executing
-            String createTableSQL = "CREATE TABLE IF NOT EXISTS flights (id INTEGER PRIMARY KEY AUTOINCREMENT, airline_name TEXT, price TEXT)";
+            // Modify the SQL statement to add a 'destination' column
+            String createTableSQL = "CREATE TABLE IF NOT EXISTS flights (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    "airline_name TEXT, " +
+                    "price TEXT, " +
+                    "destination TEXT)";
+
             System.out.println("Executing SQL Statement: " + createTableSQL);
 
             statement.executeUpdate(createTableSQL);
@@ -46,7 +48,6 @@ public class FlightsTest {
             e.printStackTrace();
         }
     }
-
 
     private void performInitialSearch(String initialDepartureDate, String initialReturnDate, String destination, WebDriverWait wait) {
         WebElement departureInput = driver.findElement(By.cssSelector(".uNiB1 > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > input:nth-child(2)"));
@@ -80,10 +81,8 @@ public class FlightsTest {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            storeFlightInformation();
+            storeFlightInformation(destination);
         }
-
-
     }
 
     @Test
@@ -91,28 +90,23 @@ public class FlightsTest {
     public void setupFlightSearch(String destination) throws ParseException, InterruptedException {
         driver.get("https://www.google.com/travel/flights");
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-            String startDate = "May 1, 2024";
-            String endDate = "May 7, 2024";
+        String startDate = "May 1, 2024";
+        String endDate = "May 7, 2024";
 
+        performInitialSearch(startDate, endDate, destination, wait);
 
+        // Perform search with the given departure and return date
+        performFlightSearch(startDate, endDate, wait);
 
-            performInitialSearch(startDate,endDate,destination,wait);
+        sleep(1000);
 
-
-
-            // Perform search with the given departure and return date
-            performFlightSearch(startDate, endDate, wait);
-
-            sleep(1000);
-
-            // Get and store flight information
-
+        // Get and store flight information
     }
 
     private void testWriteOperation() {
         try (Statement statement = connection.createStatement()) {
             // Insert a dummy record for diagnostic purposes
-            statement.executeUpdate("INSERT INTO flights (airline_name, price) VALUES ('Test Airline', '100')");
+            statement.executeUpdate("INSERT INTO flights (airline_name, price, destination) VALUES ('Test Airline', '100', 'Test Destination')");
             System.out.println("Write operation successful for diagnostic purposes.");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -142,20 +136,21 @@ public class FlightsTest {
         wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".uNiB1"))); // Assuming this element is present on the loaded page
     }
 
-    private void storeFlightInformation() {
-        String airlineName =driver.findElement(By.xpath("//*[@id=\"yDmH0d\"]/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/ul/li[1]/div/div[2]/div/div[2]/div[2]/div[2]")).getText();
+    private void storeFlightInformation(String destination) {
+        String airlineName = driver.findElement(By.xpath("//*[@id=\"yDmH0d\"]/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/ul/li[1]/div/div[2]/div/div[2]/div[2]/div[2]")).getText();
         String price = driver.findElement(By.cssSelector("ul.Rk10dc:nth-child(3) > li:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(2) > div:nth-child(6) > div:nth-child(1) > div:nth-child(2) > span:nth-child(1)")).getText();
 
         System.out.println("Airline: " + airlineName);
         System.out.println("Price: " + price);
+        System.out.println("Destination: " + destination);
 
         // Store the information in the database
-        storeFlightInformation(airlineName, price);
+        storeFlightInformation(airlineName, price, destination);
     }
 
-    private void storeFlightInformation(String airlineName, String price) {
+    private void storeFlightInformation(String airlineName, String price, String destination) {
         try (Statement statement = connection.createStatement()) {
-            statement.executeUpdate("INSERT INTO flights (airline_name, price) VALUES ('" + airlineName + "', '" + price + "')");
+            statement.executeUpdate("INSERT INTO flights (airline_name, price, destination) VALUES ('" + airlineName + "', '" + price + "', '" + destination + "')");
         } catch (SQLException e) {
             e.printStackTrace();
         }
