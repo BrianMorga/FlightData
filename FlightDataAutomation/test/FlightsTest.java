@@ -31,13 +31,22 @@ public class FlightsTest {
         System.setProperty("webdriver.gecko.driver", "geckodriver");
         driver = new FirefoxDriver();
         try {
-            connection = DriverManager.getConnection("jdbc:sqlite:flights.sqlite");
+            connection = DriverManager.getConnection("jdbc:sqlite:newflights.sqlite");
             Statement statement = connection.createStatement();
-            statement.executeUpdate("CREATE TABLE IF NOT EXISTS flights (id INTEGER PRIMARY KEY AUTOINCREMENT, airline_name TEXT, price TEXT)");
+
+            // Print the SQL statement before executing
+            String createTableSQL = "CREATE TABLE IF NOT EXISTS flights (id INTEGER PRIMARY KEY AUTOINCREMENT, airline_name TEXT, price TEXT)";
+            System.out.println("Executing SQL Statement: " + createTableSQL);
+
+            statement.executeUpdate(createTableSQL);
+
+            // Commit the changes explicitly
+            connection.commit();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
 
     private void performInitialSearch(String initialDepartureDate, String initialReturnDate, String destination, WebDriverWait wait) {
         WebElement departureInput = driver.findElement(By.cssSelector(".uNiB1 > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > input:nth-child(2)"));
@@ -98,8 +107,17 @@ public class FlightsTest {
 
             // Get and store flight information
 
+    }
 
-
+    private void testWriteOperation() {
+        try (Statement statement = connection.createStatement()) {
+            // Insert a dummy record for diagnostic purposes
+            statement.executeUpdate("INSERT INTO flights (airline_name, price) VALUES ('Test Airline', '100')");
+            System.out.println("Write operation successful for diagnostic purposes.");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.err.println("Error during the write operation.");
+        }
     }
 
     private void performFlightSearch(String departureDate, String returnDate, WebDriverWait wait) {
