@@ -11,7 +11,6 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.NoSuchElementException;
 
-
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -140,6 +139,10 @@ public class FlightsTest {
 
     private void storeFlightInformation(String destination) {
         try {
+            WebElement departureDateInput = driver.findElement(By.cssSelector(".uNiB1 > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > input:nth-child(2)"));
+            String departureDate = departureDateInput.getAttribute("value");
+            System.out.println("Departure Date: " + departureDate);
+
             WebElement airlineElement = driver.findElement(By.xpath("//*[@id=\"yDmH0d\"]/c-wiz[2]/div/div[2]/c-wiz/div[1]/c-wiz/div[2]/div[2]/div[3]/ul/li[1]/div/div[2]/div/div[2]/div[2]/div[2]"));
             String airlineName = airlineElement.getText();
             System.out.println("Airline: " + airlineName);
@@ -151,19 +154,14 @@ public class FlightsTest {
             System.out.println("Destination: " + destination);
 
             // Store the information in the database
-            storeFlightInformation(airlineName, price, destination);
+            try (Statement statement = connection.createStatement()) {
+                statement.executeUpdate("INSERT INTO flights (departure_date, airline_name, price, destination) VALUES ('" + departureDate + "', '" + airlineName + "', '" + price + "', '" + destination + "')");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
 
         } catch (NoSuchElementException e) {
-            System.out.println("Failed to retrieve airline name");
-        }
-    }
-
-
-    private void storeFlightInformation(String airlineName, String price, String destination) {
-        try (Statement statement = connection.createStatement()) {
-            statement.executeUpdate("INSERT INTO flights (airline_name, price, destination) VALUES ('" + airlineName + "', '" + price + "', '" + destination + "')");
-        } catch (SQLException e) {
-            e.printStackTrace();
+            System.out.println("Failed to retrieve departure date or airline name");
         }
     }
 
