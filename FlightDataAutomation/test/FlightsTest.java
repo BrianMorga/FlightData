@@ -72,7 +72,7 @@ public class FlightsTest {
         // Wait for the page to load - adjust the expected conditions based on the actual behavior of the page
         wait.until(ExpectedConditions.urlContains("search"));
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100; i++) {
             WebElement departureNextButton = driver.findElement(By.cssSelector(".uNiB1 > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(1) > div:nth-child(4) > button:nth-child(2)"));
             WebElement returnNextButton = driver.findElement(By.cssSelector(".uNiB1 > div:nth-child(1) > div:nth-child(1) > div:nth-child(2) > div:nth-child(1) > div:nth-child(3) > button:nth-child(2)"));
             departureNextButton.click();
@@ -90,8 +90,8 @@ public class FlightsTest {
     @Parameters({"Cancun", "Las Vegas", "Denver", "Rome", "Milan", "Paris", "Madrid", "Amsterdam", "Singapore"})
     public void setupFlightSearch(String destination) throws ParseException, InterruptedException {
         driver.get("https://www.google.com/travel/flights");
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(5));
-        String startDate = "May 1, 2024";
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        String startDate = "Tue, Apr 30";
         String endDate = "May 7, 2024";
 
         performInitialSearch(startDate, endDate, destination, wait);
@@ -166,7 +166,8 @@ public class FlightsTest {
     }
 
     @AfterClass
-    public static void cleanUp() {
+
+     public static void cleanUp() {
         // driver.close();
         try {
             if (connection != null) {
